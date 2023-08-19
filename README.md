@@ -286,11 +286,11 @@ Identificamos a SW2 como el dispositivo raiz
 
 ### Tiempos de convergencia
 
-| Protocolo | Tiempo (minutos) | IP origen | IP destino |
+| Protocolo | Primaria (minutos) | Basicos (minutos) | Diversificado (minutos)|
 |-------------|-------------|-------------|-------------|
-| STP  | 1.49.89  | 192.168.19.2   | 192.168.19.5  |
-| PVST  | 1.44.88  | 192.168.19.2   | 192.168.19.5  |
-| Rapid PVST  | 0.02 | 192.168.19.2   | 192.168.19.5  |
+| STP  | 1.49.89  | 2.46.35  | 2.30.45  |
+| PVST  | 1.44.88  |  2.38.33 | 2.22.58  |
+| Rapid PVST  | 0.02 | 0.0   | 0.0  |
 
 #### ***Se determino que el protocolo con un tiempo de convergencia menor es Rapid PVST***
 
