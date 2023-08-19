@@ -1,7 +1,7 @@
 # REDES2_2S2023_G18
 Práctica 1 del curso Redes de Computadoras 2:
 # Topologia
-
+![Topologia](Images/Topologia.png)
 
 ## Detalle del dispositivos
 | Dispositivo | IP | VLAN |
@@ -269,3 +269,7 @@ exit
 sh vlan brief
 copy running-config startup-config
 ```
+## Configuracion de STP
+
+### Identificacion del dispositivo raiz
+![Topologia](Images/Dispositivo root.png)
