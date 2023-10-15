@@ -3,7 +3,7 @@
 | Carnet | Nombre |
 | -- | -- |
 | 201830313 | Denilson Florentín de León Aguilar |
-|  | Omar |
+| 201700377 | Erick Omar Letona Figueroa | 
 ---
 # **Topología**
 # VLAN's
@@ -16,27 +16,27 @@
 **Server-PT DHCP1**
 | IP | Configuration |
 | -- | -- |
-| **Ip Address:** | 192.168.10.10 | 
+| **Ip Address:** | 192.168.10.4 | 
 | **Subnet Mask:** | 255.255.255.0 |
 
 | DHCP |  Services |
 | -- | -- |
-| **Pool Name:** | RED1 |
+| **Pool Name:** | serverpool |
 | **Ip Address:** | 192.168.10.1 | 
-| **Start Ip Address:** | 192.168.10.2 |
+| **Start Ip Address:** | 192.168.10.10 |
 | **Maximum Number of Users:** | 248 |
 
 **Server-PT DHCP2**
 | IP | Configuration |
 | -- | -- |
-| **Ip Address:** | 192.168.20.10 | 
+| **Ip Address:** | 192.168.20.4 | 
 | **Subnet Mask:** | 255.255.255.0 |
 
 | DHCP |  Services |
 | -- | -- |
-| **Pool Name:** | RED2 |
+| **Pool Name:** | serverpool |
 | **Ip Address:** | 192.168.20.1 | 
-| **Start Ip Address:** | 192.168.20.2 |
+| **Start Ip Address:** | 192.168.20.10 |
 | **Maximum Number of Users:** | 248 |
 ---
 # **Comandos de configuración**
@@ -44,37 +44,56 @@
 **MSW Edificio Principal**
 ```js
 conf t
+// VTP
+vtp domain g18
+vtp password admin
+vtp mode server
+
+// vlan
 vlan 10
 name naranja18
 vlan 20
 name verde18
 exit
 interface vlan 10
-ip address 192.168.10.1 255.255.255.0
+ip address 192.168.10.5 255.255.255.0
 no shutdown
 interface vlan 20
-ip address 192.168.20.1 255.255.255.0
+ip address 192.168.20.5 255.255.255.0
 no shutdown
+exit
 interface range GigabitEthernet1/0/3-4
 switchport mode trunk
+switchport trunk encapsulation dot1q
 switchport trunk allowed vlan all
 description ACC_VLANs
 no shutdown
 exit
 ip routing
-router ospf 33
-network 192.168.10.0 0.0.0.255 area 33
-network 192.168.20.0 0.0.0.255 area 33
+router eigrp 100
+network 192.168.10.0 0.0.0.255 
+network 192.168.20.0 0.0.0.255 
+no auto-summary
+exit
+end
 ```
 
 **MSW Edificio 1**
 ```js
 conf t
+// VTP
+vtp domain g18
+vtp password admin
+vtp mode client
+
+// vlan
 vlan 10
 name naranja18
 vlan 20
 name verde18
 exit
+
+// VLANS
 interface vlan 10
 ip address 192.168.10.1 255.255.255.0
 no shutdown
@@ -82,21 +101,43 @@ interface vlan 20
 ip address 192.168.20.1 255.255.255.0
 no shutdown
 exit
+
+// Interfaces
 interface range GigabitEthernet1/0/1-3
 switchport mode trunk
+switchport trunk encapsulation dot1q
 switchport trunk allowed vlan all
 description ACC_VLANs
 no shutdown
 exit
+
+// LACP
+interface range gigabitEthernet1/0/4-6
+switchport mode trunk
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan all
+channel-group 3 mode active
+end
+
+// EIGRP
 ip routing
-router ospf 33
-network 192.168.10.0 0.0.0.255 area 33
-network 192.168.20.0 0.0.0.255 area 33
+router eigrp 100
+network 192.168.10.0 0.0.0.255 
+network 192.168.20.0 0.0.0.255 
+no auto-summary
+exit
+end
 ```
 
 **MSW Edificio 2**
 ```js
 conft t
+// VTP
+vtp domain g18
+vtp password admin
+vtp mode client
+
+// vlan
 vlan 10
 name naranja18
 exit
@@ -111,22 +152,41 @@ interface vlan 20
 ip address 192.168.20.1 255.255.255.0
 no shutdown
 exit
+
+// Interfaces
 interface range GigabitEthernet1/0/1-3
 switchport mode trunk
 switchport trunk allowed vlan all
 description ACC_VLANs
 no shutdown
 exit
+
+// LACP
+interface range gigabitEthernet1/0/4-6
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan all
+channel-group 3 mode active
+
+// EIGRP
 ip routing
-router ospf 33
-network 192.168.10.0 0.0.0.255 area 33
-network 192.168.20.0 0.0.0.255 area 33
+router eigrp 100
+network 192.168.10.0 0.0.0.255 
+network 192.168.20.0 0.0.0.255 
+no auto-summary
 exit
+end
 ```
 
 **MSW Edificio 3**
 ```js
 conft t
+
+// VTP
+vtp domain g18
+vtp password admin
+vtp mode client
+
+// vlan
 vlan 10
 name naranja18
 exit
@@ -148,15 +208,24 @@ description ACC_VLANs
 no shutdown
 exit
 ip routing
-router ospf 33
-network 192.168.10.0 0.0.0.255 area 33
-network 192.168.20.0 0.0.0.255 area 33
+router eigrp 100
+network 192.168.10.0 0.0.0.255 
+network 192.168.20.0 0.0.0.255 
+no auto-summary
 exit
+end
 ```
 
 **Edificio 1**
 ```js
 conf t
+
+// VTP
+vtp domain g18
+vtp password admin
+vtp mode client
+
+// vlan
 vlan 10
 name naranja18
 vlan 20
@@ -172,6 +241,12 @@ end
 **Edificio 2**
 ```js
 conf t
+// VTP
+vtp domain g18
+vtp password admin
+vtp mode client
+
+// vlan
 vlan 10
 name naranja18
 vlan 20
@@ -196,6 +271,11 @@ end
 
 **Comandos**
 ```js
+// VTP
+vtp domain g18
+vtp password admin
+vtp mode client
+
 // Configuramos VLANS
 conf t
 vlan 10
@@ -206,6 +286,7 @@ exit
 
 // Configuramos conexion hacia MSW4 y MSW5 (f0/1, f0/2) y hacia MSW Edificio 1 (g0/1, g0/2 y f0/3)
 interface range fastEthernet0/1-3, gigabitEthernet0/1-2
+switchport mode trunk
 switchport trunk encapsulation dot1q
 switchport trunk allowed vlan all
 no shutdown
@@ -225,8 +306,7 @@ exit
 
 //configurar VRRP
 interface vlan 10
-ip address 192.168.10.1 255.255.255.0
-standby 1 ip 192.168.10.254
+standby 1 ip 192.168.10.1
 standby 1 priority 110
 standby 1 preempt
 no shutdown
@@ -234,8 +314,7 @@ exit
 
 // Configuramos VRRP para la VLAN 20
 interface vlan 20
-ip address 192.168.20.1 255.255.255.0
-standby 2 ip 192.168.20.254
+standby 2 ip 192.168.20.1
 standby 2 priority 110
 standby 2 preempt
 no shutdown
@@ -264,6 +343,11 @@ end
 ```js
 conf t
 
+// Configuramos VTP
+vtp domain g18
+vtp password admin
+vtp mode client
+
 // Configuramos VLANS
 conf t
 vlan 10
@@ -274,6 +358,7 @@ exit
 
 // Se configuran interfaces
 interface range gigabitEthernet0/1-2
+switchport mode trunk
 switchport trunk encapsulation dot1q
 switchport trunk allowed vlan all
 no shutdown
@@ -281,29 +366,29 @@ exit
 
 // Configuración de HSRP para la VLAN 10 (naranja18)
 interface vlan 10
-ip address 192.168.10.2 255.255.255.0 //Para MSW4 es .2, para MSW5 es .3
-ip address 192.168.10.3 255.255.255.0 
-standby 1 ip 192.168.10.254
-standby 1 priority 100
+// ip address 192.168.10.2 255.255.255.0 //Para MSW4 es .2, para MSW5 es .3
+// ip address 192.168.10.3 255.255.255.0 
+standby 1 ip 192.168.10.1
+standby 1 priority 100 // 101 para el active
 standby 1 preempt
 exit
 
 // Configuración de HSRP para la VLAN 20 (verde18)
 interface vlan 20
-ip address 192.168.20.2 255.255.255.0 //Para MSW4 es .2, para MSW5 es .3
-ip address 192.168.20.3 255.255.255.0 
-standby 2 ip 192.168.20.254
-standby 2 priority 100
+// ip address 192.168.20.2 255.255.255.0 //Para MSW4 es .2, para MSW5 es .3
+// ip address 192.168.20.3 255.255.255.0 
+standby 2 ip 192.168.20.1
+standby 2 priority 100 // 101 para el active
 standby 2 preempt
 exit
 
 // Configuración de EIGRP
-ip routing
-router eigrp 100
-network 192.168.10.0
-network 192.168.20.0
-no auto-summary
-exit
+// ip routing
+// router eigrp 100
+// network 192.168.10.0
+// network 192.168.20.0
+// no auto-summary
+// exit
 ```
 ### Configuracion Switch Core Edificio 1
 #### **MSW6**
@@ -316,6 +401,11 @@ exit
 | MSW6   | f0/2          | g0/1         | SW2     |
 **Comandos**
 ```js
+// Configuramos VTP
+vtp domain g18
+vtp password admin
+vtp mode client
+
 // Configuramos VLANS
 vlan 10
 name naranja18
